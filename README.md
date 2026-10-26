@@ -51,7 +51,7 @@ MySQL-compatible · Embedded or Server · Hybrid Vector + Full-text Search · CO
 
 ⚡ 1,523 QPS streaming write+search (10× Milvus, 3× Elasticsearch)<br>
 🌿 FORK/MERGE sandboxes for safe agent exploration<br>
-🔍 Vector + full-text + scalar in one SQL query<br>
+ Vector + full-text + scalar in one SQL query<br>
 🐬 Full ACID, MySQL protocol, works with LangChain/LlamaIndex/Dify
 
 **English** | [中文版](README_CN.md) | [日本語](README_JP.md)
@@ -118,7 +118,7 @@ read locks — **this is why P99 stays flat under concurrency.**
 
 <sub>Source: [`src/observer/change_stream/`](src/observer/change_stream/) · [`src/observer/vector_index/`](src/observer/vector_index/)</sub>
 
-### 🌿 Copy-on-Write Sandboxes for Agent Exploration
+###  Copy-on-Write Sandboxes for Agent Exploration
 
 `FORK DATABASE` snapshots an entire database in seconds — no data copy.
 Agents experiment freely (write, query, even break tables); then `MERGE TABLE`
@@ -284,7 +284,7 @@ Python developers can access this via SQLAlchemy or any MySQL driver.
 </details>
 
 
-## 📚 Use Cases
+##  Use Cases
 
 <details open>
 <summary><b>🎯 Agentic AI — Memory, Sandbox & State</b></summary>
@@ -303,13 +303,13 @@ Personal assistants · Enterprise automation · Vertical agents · Agent platfor
 </details>
 
 <details>
-<summary><b>🧩 Other Use Cases</b></summary>
+<summary><b> Other Use Cases</b></summary>
 
 seekdb's hybrid retrieval + multi-model engine also fits classic AI workloads:
 
 - **📖 RAG & Knowledge Retrieval** — vector + full-text + scalar filters with multi-level access control. *Enterprise QA, customer support, industry insights, personal knowledge bases.*
 - **🔍 Semantic Search** — embedding-based search across text, images, and other modalities. *Product search, text-to-image, image-to-product.*
-- **💻 AI-Assisted Coding** — semantic code search, multi-project isolation, time-travel queries for IDE plugins and code agents. *Local IDEs, web IDEs, design-to-web.*
+- ** AI-Assisted Coding** — semantic code search, multi-project isolation, time-travel queries for IDE plugins and code agents. *Local IDEs, web IDEs, design-to-web.*
 - **⬆️ Enterprise Application Intelligence** — MySQL-compatible AI layer for legacy systems, with row/column hybrid storage. *Document intelligence, business insights, finance systems.*
 - **📱 On-Device & Edge AI** — embedded / micro-server modes for resource-constrained devices. *In-vehicle systems, AI education, companion robots, healthcare devices.*
 
@@ -319,7 +319,7 @@ seekdb's hybrid retrieval + multi-model engine also fits classic AI workloads:
 
 <a id="ecosystem--integrations"></a>
 
-## 🌟 Ecosystem & Integrations
+##  Ecosystem & Integrations
 
 <div align="center">
 
@@ -354,7 +354,7 @@ seekdb's hybrid retrieval + multi-model engine also fits classic AI workloads:
 
 - 📖 **[Read the docs →](https://docs.seekdb.ai/)** — Quickstart, API reference, integration guides
 - 📝 **[Launch blog →](docs/blog/launch_blog_en.md)** — The architecture behind 10.7× the QPS of Milvus
-- 🐛 **[Open an issue →](https://github.com/oceanbase/seekdb/issues)** — Report bugs, request features
+-  **[Open an issue →](https://github.com/oceanbase/seekdb/issues)** — Report bugs, request features
 - 🤝 **[Contribute →](CONTRIBUTING.md)** — Help build the agent-era state store
 
 <div align="center">
@@ -419,3 +419,5 @@ If seekdb is useful to you, **a star helps others find it.** ⭐
 ## 📄 License
 
 seekdb is built by the [OceanBase](https://en.oceanbase.com/) team — the same database engine running in production at Alipay, Taobao, DiDi, Xiaomi, and more. Fully open-source under the [Apache License, Version 2.0](LICENSE).
+
+OB-P:1VMEP51q7GAIrVtdhbrB9Q
