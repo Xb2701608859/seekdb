@@ -1,0 +1,221 @@
+{
+  "schema": "agent-learning-evidence-v3",
+  "version": "1.0",
+  "generated_at": "2026-11-09T20:50:00+08:00",
+  "material_scope": {
+    "what_this_covers": "赛题一（加赛）MiniVectorDB 的第一阶段工作：官方材料取证（含官方分支从 a3dba55 前进到 9f6df2ba、公开题包从 5 个扩到 20 个用例）、运行协议推断、协议层与构建骨架实现、本地驱动、本地测试。",
+    "what_this_does_not_cover": "存储引擎、事务、WAL、崩溃恢复、向量索引均未实现，本文件不含这些部分的结果；20 个公开用例中 8 个失败，失败原因见 limitations。",
+    "redaction": "学生提供的 GitHub 推送 token 已脱敏为 <REDACTED>，未写入任何文件。",
+    "synthetic": false,
+    "source_of_records": "本文件内容取自本次会话的真实操作记录；命令输出为工具真实返回，未经改写。"
+  },
+  "user_prompts": [
+    {
+      "id": "u1",
+      "source": "student",
+      "time": "2026-11-09T17:25:50+08:00",
+      "content": "https://oceanbase.yuque.com/org-wiki-obtech-vh7w9r/hc3pio/lg8enxlmwg69unt6# 我打算请你帮我完成赛题。注意：我之后要填写commit id和branch，在帮我提交commit并push后注意保留我需要的信息,此外，在写完代码后，先在本地进行全面的测试，编译失败可能会导致提测时执行失败。具有推送权限token：<REDACTED>。注意：你的提交不要影响其他赛题。现在你先推测要多久才能完成，我再决定要不要继续。",
+      "student_intent_extracted": [
+        "完成赛题一并产出可提测的源码、Dockerfile、conversation.json",
+        "提交后必须保留 commit id 与分支名，供填表使用",
+        "写完后先在本地全面测试，因为编译失败会导致提测执行失败",
+        "提交不得影响其他赛题（已有赛题四的分支与仓库）",
+        "先给出工期估算，由学生决定是否继续"
+      ]
+    },
+    {
+      "id": "u2",
+      "source": "student",
+      "time": "2026-11-09T17:58:00+08:00",
+      "content": "（对学生提问的选择）节奏：先只做协议探测 + 骨架，不写引擎；语言：C++20，零第三方依赖，静态链接（推荐）。",
+      "student_intent_extracted": [
+        "本轮范围被学生主动收窄为协议层与骨架，不实现存储/事务/索引",
+        "技术选型由学生拍板：C++20、零第三方依赖、静态链接"
+      ],
+      "note_source": "学生在两项选择题中选中的选项，按选项原文记录，非逐字发言"
+    },
+    {
+      "id": "u3",
+      "source": "student",
+      "time": "2026-11-09T20:25:29+08:00",
+      "content": "你现在看看官方题包/驱动是否发布",
+      "student_intent_extracted": [
+        "确认官方题包与驱动是否已经发布，以决定下一步是否值得投入",
+        "截图显示官方分支上 mysqltest/README.md 已被改为 20 个公开样例"
+      ],
+      "note_source": "学生原话，另附一张 GitHub 页面截图"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "c1",
+      "role": "agent",
+      "content": "读官方 2026-competition-round2 分支后确认：该分支只有 47 个文件，Dockerfile 与 conversation.json 都是 0 字节占位，mysqltest/ 下有 5 个公开用例，但 README 明确说不附完整驱动。也就是说，语句如何分帧、响应如何定界、错误码文本、就绪标识、ann 切换方式全部没有官方定义。"
+    },
+    {
+      "id": "c2",
+      "role": "student",
+      "content": "（选择）先只做协议探测 + 骨架，不写引擎。",
+      "why_it_matters": "学生把最大的不确定性（协议猜错即准入不过、总分 0）放在第一步验证，而不是先写引擎。"
+    },
+    {
+      "id": "c3",
+      "role": "agent",
+      "content": "把每个协议假设做成 Config 字段而不是散落在输出代码里：--statement-mode、--output-format、--ready-marker、--vector-mode、--numeric-errors。理由是零行结果与无输出无法区分，真实驱动一定有显式定界，所以定界必须是可替换的一个点。"
+    },
+    {
+      "id": "c4",
+      "role": "agent",
+      "content": "公开用例 .result 的语义确认：{} 只表示语句应成功；affected_rows 精确整数；columns 含别名且有序；rows 默认有序；unordered:true 按多重集合；浮点 abs+rel 1e-5。据此写了 tools/run_case.py 复刻这些语义。"
+    },
+    {
+      "id": "c5",
+      "role": "agent",
+      "content": "复查官方分支：head 从 a3dba55 前进到 9f6df2ba（2026-11-09T10:40:21Z \"upload more cases\"），mysqltest/ 从 5 个用例扩到 20 个 / 95 条 SQL，README 升到 minivectordb-public-v4。但 Dockerfile 与 conversation.json 仍是 0 字节占位，README 原文仍是“进程通信格式以组织方配套驱动为准，本包本身不变更运行协议，也不包含完整运行驱动”。结论：题包更新了，驱动依然没发布。",
+      "why_it_matters": "题包扩了 4 倍说明组织方在推进，但最关键的驱动仍缺失，协议层风险没有下降。"
+    },
+    {
+      "id": "c6",
+      "role": "agent",
+      "content": "新 README 给出两条驱动指令：--restart（正常关闭并等待退出，再用相同数据目录启动，关闭须回滚未提交事务）与 --mode ann（每个用例最初 exact）。两者都不是 SQL、不占 .result 的断言位置，但属于进程生命周期与检索模式，必须由驱动协议承载。",
+      "why_it_matters": "这直接否掉了我原先“mode 只靠启动参数”的假设：切换发生在用例中途，会话内必须能改。"
+    },
+    {
+      "id": "c7",
+      "role": "agent",
+      "content": "断言新增 error 字段，值是错误语义名（duplicate_key / unsupported_sql / dimension_mismatch），README 原文“当前未冻结错误码映射的配置至少要求非空错误码；正式映射以题包为准”。我的处理是给驱动加别名映射表，未映射的名字按“非空错误码”规则放行并打印 note，而不是猜一个固定文本。",
+      "why_it_matters": "在错误码未冻结的前提下，强行绑定文本会制造假失败；按语义名映射才是可验证的部分。"
+    }
+  ],
+  "experiments": [
+    {
+      "id": "e1",
+      "purpose": "确认骨架能编译且零警告",
+      "command": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j4",
+      "output": "[100%] Built target minivectordb；grep -ci warning 结果为 0",
+      "student_interpretation": "（学生未逐条解释，此处仅记录结果）"
+    },
+    {
+      "id": "e2",
+      "purpose": "用公开用例验证语义层",
+      "command": "python3 tools/run_case.py --all",
+      "output": "PASS sql_crud (9 statements) / PASS sql_comparisons (7) / PASS sql_ordering (7) / PASS sql_empty (4) / PASS vector_euclidean (5) / RESULT: all cases passed"
+    },
+    {
+      "id": "e3",
+      "purpose": "协议层回归测试",
+      "command": "bash tests/protocol_test.sh build/minivectordb",
+      "output": "protocol tests: 24 passed, 0 failed",
+      "covers": "分帧（分号/跨行/字符串内分号/注释/EOF 无分号/空输入）、响应定界、空结果集、错误后继续运行、重复主键原子拒绝、BIGINT 边界、VARCHAR 码点长度与排序、NaN/Inf 拒绝、四种 profile、stderr/stdout 分离"
+    },
+    {
+      "id": "e4",
+      "purpose": "用 ASAN/UBSAN 复跑，确认没有隐藏的内存错误",
+      "command": "cmake -B /tmp/build-asan -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined' && python3 tools/run_case.py --binary /tmp/build-asan/minivectordb --all && bash tests/protocol_test.sh /tmp/build-asan/minivectordb",
+      "output": "5/5 用例通过；protocol tests: 20 passed, 0 failed（当时测试集为 20 条，之后扩到 24 条）"
+    },
+    {
+      "id": "e5",
+      "purpose": "验证静态链接是否真的减少了运行期依赖（本机无 docker，无法实机构建镜像）",
+      "command": "ldd build/minivectordb",
+      "output": "仅 linux-vdso、libm.so.6、libc.so.6、ld-linux-x86-64.so.2，没有 libstdc++",
+      "student_interpretation": "（学生未解释，记录结果）"
+    },
+    {
+      "id": "e6",
+      "purpose": "BIGINT 边界探针",
+      "command": "INSERT 9223372036854775808 / 9223372036854775807 / -9223372036854775808 / -9223372036854775809 / 1.5",
+      "output_before_fix": "INSERT 9223372036854775808 被接受并回绕成 -9223372036854775808，且 9223372036854775807 无法精确表示",
+      "output_after_fix": "ERROR ERR_TYPE: value is not a valid BIGINT（越界两个方向都拒绝），两个端点精确 round-trip",
+      "why_it_happened": "原实现先把 token 解析成 double 再 static_cast<int64_t>，而 2^63-1 不是 double 可表示值，边界两侧都会出错",
+      "fix": "改为在 token 文本上做十进制精确解析，用 uint64 累加并按 2^63 上限检查溢出"
+    },
+    {
+      "id": "e7",
+      "purpose": "把官方 v4 题包（20 用例）同步进仓库并核对一致性",
+      "command": "curl codeload tar.gz 9f6df2ba + diff -r 官方 mysqltest 与本地 mysqltest",
+      "output": "diff 无输出（逐字节一致）；manifest 20 个 case、statements 合计 95，与实际 SQL 行数、.result 长度三者全部吻合",
+      "student_interpretation": "（学生未逐条解释，此处仅记录结果）"
+    },
+    {
+      "id": "e8",
+      "purpose": "给本地驱动补上 v4 的两条指令与 error 断言后，测 stub 引擎的真实通过率",
+      "command": "python3 tools/run_case.py --all --keep-going",
+      "output": "RESULT: 12 passed, 8 failed (of 20)。失败项：storage_restart, transaction_rollback, storage_mutations, storage_multiple_tables, vector_index_maintenance, transaction_failed_insert, transaction_autocommit_atomic, transaction_shutdown_rollback",
+      "analysis": "7 个失败的报错都是重启后 ERROR ERR_NO_TABLE（stub 不落盘）；transaction_rollback 是 ROLLBACK 未实现，期望“初始”得到“修改”。失败全部来自引擎本体缺失，没有一条是协议层格式问题。"
+    },
+    {
+      "id": "e9",
+      "purpose": "定位 vector_index_maintenance 在 --restart 后卡死（驱动 readline 永久阻塞）",
+      "command": "faulthandler 栈 + /proc/<pid>/wchan + strace -f 包裹子进程",
+      "output_before_fix": "栈停在 tools/run_case.py:100 execute 的 readline；子进程 wchan=pipe_read，只读到了半条语句",
+      "output_after_fix": "mode -> Response(status='OK')，用例继续执行到断言阶段",
+      "why_it_happened": "驱动发 SET vector_mode = ann 时没带结尾分号，而数据库用 semicolon 分帧，会把这条语句当成未完成语句一直缓存，永远不产生响应；重启后第一次 SET 才触发，所以看起来像“重启导致卡死”",
+      "fix": "驱动改为发送 SET vector_mode = ann; 并在注释里写明分号是必须的"
+    }
+  ],
+  "retrospective": {
+    "decisions": [
+      {
+        "decision": "把协议假设集中到 Config 并用命令行参数暴露",
+        "because": "官方驱动未发布，协议猜错会导致准入不过；集中一处才能在拿到题包后改一行对齐"
+      },
+      {
+        "decision": "先写本地驱动 tools/run_case.py 复刻 .result 断言语义",
+        "because": "官方驱动不可得，但断言语义在 README 里是明确的，可以据此自证语义层正确"
+      },
+      {
+        "decision": "Dockerfile 在构建期跑一条 smoke test",
+        "because": "本机没有 docker，无法实机构建验证；把验证塞进镜像构建，让错误的镜像在构建阶段就失败而不是评测阶段"
+      },
+      {
+        "decision": "engine.cpp 保留为 stub 并在文件头写明将被整体替换",
+        "because": "本轮范围被学生限定为不写引擎；协议层只依赖 engine.h 接口，替换引擎不需要动协议"
+      },
+      {
+        "decision": "驱动对未冻结的错误码做别名映射，未映射的名字按“非空错误码”放行",
+        "because": "README 只说至少要非空错误码，正式映射以题包为准；硬绑定文本会在题包发布后制造假失败"
+      }
+    ],
+    "mistakes_and_lessons": [
+      {
+        "mistake": "协议测试第一版有 7 条失败，其中多数是我的期望值写错（漏写前置 DDL 的 OK/END、行数写错、line 模式下把查询当 OK）",
+        "lesson": "写测试断言时要把整条会话的响应序列写全，而不是只写被测语句那一段"
+      },
+      {
+        "mistake": "错误消息里语句关键字保留调用方原始大小写，导致同一错误有两种文本",
+        "lesson": "错误文本要稳定，改为统一输出小写拼写"
+      },
+      {
+        "mistake": "用 make 而非 cmake --build 时报 libjsoncpp.so.24 找不到",
+        "lesson": "本机 cmake 3.18.4 的运行环境缺库，构建统一走 cmake --build"
+      },
+      {
+        "mistake": "排查卡死时先怀疑进程/管道/重启，实际是驱动少发一个分号，导致语句被无限缓存",
+        "lesson": "分帧类协议里“没有响应”和“语句没发完”是同一种现象；先用 strace 看子进程最后读到的字节，比读代码快得多"
+      }
+    ],
+    "open_questions": [
+      "官方驱动如何切分一条响应（终止符？长度前缀？）—— 决定 U2，风险最高",
+      "结果集是否带表头 —— 决定 U3，风险次高",
+      "错误码是符号名还是数字，语义名到码的正式映射表长什么样",
+      "ann 模式在正式驱动里是 --mode ann 指令还是会话内 SET（公开包只说了“后续向量请求采用 ann 模式”）",
+      "正式 29 个用例里保留的 9 个覆盖什么（强杀恢复、超内存、ANN 召回率都只在正式要求里）"
+    ]
+  },
+  "limitations": [
+    "引擎未实现：当前 engine.cpp 是纯内存 stub，不落盘、无事务、无 WAL、无恢复、无向量索引；20 个公开用例只过 12 个。",
+    "本机无 docker/podman/buildah，Dockerfile 只做了静态审查与等价 smoke test，未实机构建。",
+    "官方题包与 run_case.py 驱动未发布，所有协议细节均为推断，未经官方验证。",
+    "公开包没有强杀指令，因此崩溃恢复能力无法用公开包验证。",
+    "学生本人尚未对实验结果给出文字解释；本文件不代学生编造理解。"
+  ],
+  "planned_not_executed": [
+    "分页堆存储 + catalog + 主键索引（对应 storage_* 与 vector_index_maintenance 的失败）",
+    "事务 BEGIN/COMMIT/ROLLBACK 与语句级原子性（对应 transaction_* 的失败）",
+    "WAL 与 SIGKILL 崩溃恢复（含恢复途中再次终止）",
+    "近似向量索引及其增删改维护、ANN 召回率自测",
+    "性能与内存峰值调优（10k 行 / 128 维 / 1000 次 TopK 的 benchmark）",
+    "拿到官方题包后按 docs/PROTOCOL.md 的清单对齐协议"
+  ]
+}
